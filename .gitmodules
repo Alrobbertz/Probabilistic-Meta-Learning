@@ -1,0 +1,6 @@
+[submodule "benchmarks/NAB"]
+	path = benchmarks/NAB
+	url = https://github.com/numenta/NAB.git
+[submodule "benchmarks/SKAB"]
+	path = benchmarks/SKAB
+	url = https://github.com/waico/SKAB.git
