@@ -1,3 +1,6 @@
+# Omniglot Data Files
+data/Omniglot/*
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
