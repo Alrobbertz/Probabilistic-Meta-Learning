@@ -1,2 +1,0 @@
-Options: Namespace(checkpoint_dir='./checkpoint', d_theta=256, dataset='Omniglot', dropout=0.9, iterations=80000, learning_rate=0.0001, mode='train_test', print_freq=200, samples=10, shot=5, tasks_per_batch=16, test_model_path=None, test_shot=5, test_way=5, way=5)
-
