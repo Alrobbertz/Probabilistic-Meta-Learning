@@ -1,5 +1,7 @@
 # Omniglot Data Files
 data/Omniglot/*
+*/ipynb_checkpoints
+*/checkpoint/*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
