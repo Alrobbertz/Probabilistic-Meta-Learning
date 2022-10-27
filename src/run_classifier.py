@@ -199,29 +199,37 @@ def main(unused_argv):
             best_validation_accuracy = 0.0
             train_iteration_accuracy = []
             sess.run(tf.global_variables_initializer())
+
             # Main training loop
             while iteration < args.iterations:
+
                 train_inputs, test_inputs, train_outputs, test_outputs = \
                     data.get_batch('train', args.tasks_per_batch, args.shot, args.way, eval_samples_train)
-
                 feed_dict = {train_images: train_inputs, test_images: test_inputs,
                              train_labels: train_outputs, test_labels: test_outputs,
                              dropout_keep_prob: args.dropout}
+                             
                 _, iteration_loss, iteration_accuracy = sess.run([train_step, loss, accuracy], feed_dict)
                 train_iteration_accuracy.append(iteration_accuracy)
+
                 if (iteration > 0) and (iteration % args.print_freq == 0):
+                    
                     # compute accuracy on validation set
                     validation_iteration_accuracy = []
                     validation_iteration = 0
+                    
                     while validation_iteration < validation_batches:
+                        
                         train_inputs, test_inputs, train_outputs, test_outputs = \
                             data.get_batch('validation', args.tasks_per_batch, args.shot, args.way, eval_samples_test)
                         feed_dict = {train_images: train_inputs, test_images: test_inputs,
                                      train_labels: train_outputs, test_labels: test_outputs,
                                      dropout_keep_prob: 1.0}
+                        
                         iteration_accuracy = sess.run(accuracy, feed_dict)
                         validation_iteration_accuracy.append(iteration_accuracy)
                         validation_iteration += 1
+                    
                     validation_accuracy = np.array(validation_iteration_accuracy).mean()
                     train_accuracy = np.array(train_iteration_accuracy).mean()
 
@@ -235,6 +243,7 @@ def main(unused_argv):
                     train_iteration_accuracy = []
 
                 iteration += 1
+            
             # save the checkpoint from the final epoch
             saver.save(sess, save_path=checkpoint_path_final)
             print_and_log(logfile, 'Fully-trained model saved to: {}'.format(checkpoint_path_final))
@@ -246,6 +255,8 @@ def main(unused_argv):
                 saver.restore(sess, save_path=model_path)
             test_iteration = 0
             test_iteration_accuracy = []
+
+            # Main Test Loop
             while test_iteration < test_iterations:
                 train_inputs, test_inputs, train_outputs, test_outputs = \
                                         data.get_batch('test', test_args_per_batch, args.test_shot, args.test_way,
@@ -256,9 +267,10 @@ def main(unused_argv):
                 iter_acc = sess.run(accuracy, feedDict)
                 test_iteration_accuracy.append(iter_acc)
                 test_iteration += 1
+            
             test_accuracy = np.array(test_iteration_accuracy).mean() * 100.0
-            confidence_interval_95 = \
-                (196.0 * np.array(test_iteration_accuracy).std()) / np.sqrt(len(test_iteration_accuracy))
+            confidence_interval_95 = (196.0 * np.array(test_iteration_accuracy).std()) / np.sqrt(len(test_iteration_accuracy))
+            
             print_and_log(logfile, 'Held out accuracy: {0:5.3f} +/- {1:5.3f} on {2:}'
                           .format(test_accuracy, confidence_interval_95, model_path))
 
