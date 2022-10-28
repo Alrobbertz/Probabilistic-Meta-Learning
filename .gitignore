@@ -1,5 +1,9 @@
-# Omniglot Data Files
+# Data Files
 data/Omniglot/*
+**/omniglot.npy
+data/NAB/*
+**/nab.npy
+**/nab_labels.csv
 */ipynb_checkpoints
 */checkpoint/*
 
