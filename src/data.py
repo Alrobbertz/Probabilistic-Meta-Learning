@@ -1,5 +1,6 @@
 import sys
 import omniglot
+import nab
 
 
 """
@@ -14,6 +15,12 @@ def get_data(dataset, mode='train'):
                                      train_size=1100,
                                      validation_size=100,
                                      augment_data=True,
+                                     seed=111)
+    if dataset == 'NAB':
+        return nab.NumentaData(path='../data/nab.npy',
+                                     train_size=200,
+                                     validation_size=75,
+                                     augment_data=False,
                                      seed=111)
     else:
         sys.exit("Unsupported dataset type (%s)." % dataset)

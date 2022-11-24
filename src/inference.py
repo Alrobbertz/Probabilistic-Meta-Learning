@@ -49,7 +49,6 @@ def infer_classifier(features, labels, d_theta, num_classes):
     classifier['bias_mean'] = tf.reshape(tf.concat(class_bias_means, axis=1), [num_classes, ])
     classifier['weight_log_variance'] = tf.transpose(tf.concat(class_weight_logvars, axis=0))
     classifier['bias_log_variance'] = tf.reshape(tf.concat(class_bias_logvars, axis=1), [num_classes, ])
-    
     return classifier
 
 

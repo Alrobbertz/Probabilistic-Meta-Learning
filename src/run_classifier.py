@@ -38,7 +38,8 @@ from __future__ import print_function
 import numpy as np
 import tensorflow as tf
 import argparse
-from features import extract_features_omniglot, extract_features_mini_imagenet
+from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score, confusion_matrix
+from features import extract_features_omniglot, extract_features_mini_imagenet, extract_features_nab
 from inference import infer_classifier
 from utilities import sample_normal, multinoulli_log_density, print_and_log, get_log_files
 from data import get_data
@@ -50,7 +51,7 @@ parse_command_line: command line parser
 
 def parse_command_line():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--dataset", "-d", choices=["Omniglot", "miniImageNet"],
+    parser.add_argument("--dataset", "-d", choices=["Omniglot", "miniImageNet", "NAB"],
                         default="Omniglot", help="Dataset to use")
     parser.add_argument("--mode", choices=["train", "test", "train_test"], default="train_test",
                         help="Whether to run traing only, testing only, or both training and testing.")
@@ -107,13 +108,15 @@ def main(unused_argv):
     feature_extractor_fn = extract_features_mini_imagenet
     if args.dataset == "Omniglot":
         feature_extractor_fn = extract_features_omniglot
+    if args.dataset == "NAB":
+        feature_extractor_fn = extract_features_nab
 
     # evaluation samples
     eval_samples_train = 15
     eval_samples_test = args.shot
 
     # testing parameters
-    test_iterations = 600
+    test_iterations = 6000
     test_args_per_batch = 1  # always use a batch size of 1 for testing
 
     # tf placeholders
@@ -143,6 +146,7 @@ def main(unused_argv):
     # Relevant computations for a single task
     def evaluate_task(inputs):
         train_inputs, train_outputs, test_inputs, test_outputs = inputs
+
         with tf.variable_scope('shared_features'):
             # extract features from train and test data
             features_train = feature_extractor_fn(images=train_inputs,
@@ -168,25 +172,31 @@ def main(unused_argv):
         test_labels_tiled = tf.tile(tf.expand_dims(test_outputs, 0), [args.samples, 1, 1])
         task_log_py = multinoulli_log_density(inputs=test_labels_tiled, logits=logits_sample_test)
         averaged_predictions = tf.reduce_logsumexp(logits_sample_test, axis=0) - tf.log(L)
+       
+       # Calculate Task Accuracy 
         task_accuracy = tf.reduce_mean(tf.cast(tf.equal(tf.argmax(test_outputs, axis=-1),
                                                         tf.argmax(averaged_predictions, axis=-1)), tf.float32))
+        
+        # Calculate Task Loss
         task_score = tf.reduce_logsumexp(task_log_py, axis=0) - tf.log(L)
         task_loss = -tf.reduce_mean(task_score, axis=0)
 
-        return [task_loss, task_accuracy]
+        return [task_loss, task_accuracy, averaged_predictions]
 
     # tf mapping of batch to evaluation function
     batch_output = tf.map_fn(fn=evaluate_task,
                              elems=(train_images, train_labels, test_images, test_labels),
-                             dtype=[tf.float32, tf.float32],
+                             dtype=[tf.float32, tf.float32, tf.float32],
                              parallel_iterations=args.tasks_per_batch)
 
     # average all values across batch
-    batch_losses, batch_accuracies = batch_output
+    batch_losses, batch_accuracies, batch_results = batch_output
     loss = tf.reduce_mean(batch_losses)
     accuracy = tf.reduce_mean(batch_accuracies)
 
-    with tf.Session() as sess:
+    sess = tf.Session()
+    with sess.as_default():
+        assert tf.compat.v1.get_default_session() is sess
         saver = tf.train.Saver()
 
         if args.mode == 'train' or args.mode == 'train_test':
@@ -255,6 +265,8 @@ def main(unused_argv):
                 saver.restore(sess, save_path=model_path)
             test_iteration = 0
             test_iteration_accuracy = []
+            test_y_true = []
+            test_y_pred = []
 
             # Main Test Loop
             while test_iteration < test_iterations:
@@ -264,12 +276,30 @@ def main(unused_argv):
                 feedDict = {train_images: train_inputs, test_images: test_inputs,
                             train_labels: train_outputs, test_labels: test_outputs,
                             dropout_keep_prob: 1.0}
-                iter_acc = sess.run(accuracy, feedDict)
+                # Feed-Forward Pass
+                iter_acc, iter_results = sess.run([accuracy, batch_results], feedDict)
                 test_iteration_accuracy.append(iter_acc)
+
+                # Aggregate Results
+                for i in range(len(iter_results[0])):
+                    test_y_true.append(np.argmax(test_outputs[0][i]))
+                    test_y_pred.append(np.argmax(iter_results[0][i]))
+
                 test_iteration += 1
             
+            # Accuracy Score
             test_accuracy = np.array(test_iteration_accuracy).mean() * 100.0
             confidence_interval_95 = (196.0 * np.array(test_iteration_accuracy).std()) / np.sqrt(len(test_iteration_accuracy))
+
+            # F1 Score
+            a_score = accuracy_score(y_true=test_y_true, y_pred=test_y_pred)
+            p_score = precision_score(y_true=test_y_true, y_pred=test_y_pred)
+            r_score = recall_score(y_true=test_y_true, y_pred=test_y_pred)
+            f_score = f1_score(y_true=test_y_true, y_pred=test_y_pred)
+            cm = confusion_matrix(y_true=test_y_true, y_pred=test_y_pred)
+            print(f"\nTOTAL Y_TRUE: {sum(test_y_true)} Y_PRED: {sum(test_y_pred)}")
+            print(cm)
+            print(f"Accuracy: {a_score} Precision: {p_score} Recall: {r_score} F1-Score: {f_score}\n")
             
             print_and_log(logfile, 'Held out accuracy: {0:5.3f} +/- {1:5.3f} on {2:}'
                           .format(test_accuracy, confidence_interval_95, model_path))

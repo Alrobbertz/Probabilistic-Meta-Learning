@@ -1,6 +1,17 @@
 import tensorflow as tf
 from utilities import conv2d_pool_block, conv2d_transpose_layer, dense_layer, dense_block
 
+def extract_features_nab(images, output_size, use_batch_norm, dropout_keep_prob):
+    
+    # 3 Dense Layers 
+    # flatten output
+    h = tf.contrib.layers.flatten(images)
+    h = dense_block(inputs=h, output_size=40, use_batch_norm=use_batch_norm, dropout_keep_prob=dropout_keep_prob, name='dense_1')
+    h = dense_block(inputs=h, output_size=20, use_batch_norm=use_batch_norm, dropout_keep_prob=dropout_keep_prob, name='dense_2')
+    h = dense_block(inputs=h, output_size=output_size, use_batch_norm=use_batch_norm, dropout_keep_prob=dropout_keep_prob, name='dense_3')
+
+    # Return Outputs
+    return h
 
 def extract_features_shapenet(images, output_size, use_batch_norm, dropout_keep_prob):
     """
@@ -48,7 +59,6 @@ def extract_features_omniglot(images, output_size, use_batch_norm, dropout_keep_
 
     # flatten output
     h = tf.contrib.layers.flatten(h)
-
     return h
 
 
