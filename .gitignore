@@ -3,6 +3,8 @@ data/Omniglot/*
 **/omniglot.npy
 data/NAB/*
 **/nab.npy
+data/SKAB/*
+**/skab.npy
 **/nab_labels.csv
 */ipynb_checkpoints
 */checkpoint/*
