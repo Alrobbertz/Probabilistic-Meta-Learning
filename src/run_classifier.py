@@ -39,7 +39,7 @@ import numpy as np
 import tensorflow as tf
 import argparse
 from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score, confusion_matrix
-from features import extract_features_omniglot, extract_features_mini_imagenet, extract_features_nab
+from features import extract_features_omniglot, extract_features_mini_imagenet, extract_features_nab, extract_features_skab
 from inference import infer_classifier
 from utilities import sample_normal, multinoulli_log_density, print_and_log, get_log_files
 from data import get_data
@@ -51,7 +51,7 @@ parse_command_line: command line parser
 
 def parse_command_line():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--dataset", "-d", choices=["Omniglot", "miniImageNet", "NAB"],
+    parser.add_argument("--dataset", "-d", choices=["Omniglot", "miniImageNet", "NAB", "SKAB"],
                         default="Omniglot", help="Dataset to use")
     parser.add_argument("--mode", choices=["train", "test", "train_test"], default="train_test",
                         help="Whether to run traing only, testing only, or both training and testing.")
@@ -110,6 +110,8 @@ def main(unused_argv):
         feature_extractor_fn = extract_features_omniglot
     if args.dataset == "NAB":
         feature_extractor_fn = extract_features_nab
+    if args.dataset == "SKAB":
+        feature_extractor_fn = extract_features_skab
 
     # evaluation samples
     eval_samples_train = 15

@@ -1,6 +1,7 @@
 import sys
 import omniglot
 import nab
+import skab
 
 
 """
@@ -20,6 +21,12 @@ def get_data(dataset, mode='train'):
         return nab.NumentaData(path='../data/nab.npy',
                                      train_size=200,
                                      validation_size=75,
+                                     augment_data=False,
+                                     seed=111)
+    if dataset == 'SKAB':
+        return skab.SKABData(path='../data/skab.npy',
+                                     train_size=10,
+                                     validation_size=5,
                                      augment_data=False,
                                      seed=111)
     else:
