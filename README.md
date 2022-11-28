@@ -21,5 +21,11 @@ python run_classifier.py -d Omniglot --iterations 200
 ### NAB
 
 `
-python run_classifier.py -d NAB --d_theta 10 --way 2 --test_way 2 --iterations 200
+python run_classifier.py -d NAB --d_theta 128 --shot 5 --way 2 --test_way 2 --iterations 10000
+`
+
+### SKAB
+
+`
+python run_classifier.py -d SKAB --d_theta 128 --shot 5 --way 2 --test_way 2 --iterations 10000
 `

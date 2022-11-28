@@ -25,8 +25,8 @@ def get_data(dataset, mode='train'):
                                      seed=111)
     if dataset == 'SKAB':
         return skab.SKABData(path='../data/skab.npy',
-                                     train_size=10,
-                                     validation_size=5,
+                                     train_size=24,
+                                     validation_size=6,
                                      augment_data=False,
                                      seed=111)
     else:
