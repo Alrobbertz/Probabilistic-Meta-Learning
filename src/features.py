@@ -6,8 +6,8 @@ def extract_features_nab(images, output_size, use_batch_norm, dropout_keep_prob)
     # 3 Dense Layers 
     # flatten output
     h = tf.contrib.layers.flatten(images)
-    h = dense_block(inputs=h, output_size=40, use_batch_norm=use_batch_norm, dropout_keep_prob=dropout_keep_prob, name='dense_1')
-    h = dense_block(inputs=h, output_size=20, use_batch_norm=use_batch_norm, dropout_keep_prob=dropout_keep_prob, name='dense_2')
+    h = dense_block(inputs=h, output_size=512, use_batch_norm=use_batch_norm, dropout_keep_prob=dropout_keep_prob, name='dense_1')
+    h = dense_block(inputs=h, output_size=256, use_batch_norm=use_batch_norm, dropout_keep_prob=dropout_keep_prob, name='dense_2')
     h = dense_block(inputs=h, output_size=output_size, use_batch_norm=use_batch_norm, dropout_keep_prob=dropout_keep_prob, name='dense_3')
 
     # Return Outputs
@@ -19,8 +19,8 @@ def extract_features_skab(images, output_size, use_batch_norm, dropout_keep_prob
     # 3 Dense Layers 
     # flatten output
     h = tf.contrib.layers.flatten(images)
-    h = dense_block(inputs=h, output_size=40, use_batch_norm=use_batch_norm, dropout_keep_prob=dropout_keep_prob, name='dense_1')
-    h = dense_block(inputs=h, output_size=20, use_batch_norm=use_batch_norm, dropout_keep_prob=dropout_keep_prob, name='dense_2')
+    h = dense_block(inputs=h, output_size=512, use_batch_norm=use_batch_norm, dropout_keep_prob=dropout_keep_prob, name='dense_1')
+    h = dense_block(inputs=h, output_size=256, use_batch_norm=use_batch_norm, dropout_keep_prob=dropout_keep_prob, name='dense_2')
     h = dense_block(inputs=h, output_size=output_size, use_batch_norm=use_batch_norm, dropout_keep_prob=dropout_keep_prob, name='dense_3')
 
     # Return Outputs

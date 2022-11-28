@@ -38,7 +38,7 @@ from __future__ import print_function
 import numpy as np
 import tensorflow as tf
 import argparse
-from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score, confusion_matrix
+from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score, confusion_matrix, det_curve
 from features import extract_features_omniglot, extract_features_mini_imagenet, extract_features_nab, extract_features_skab
 from inference import infer_classifier
 from utilities import sample_normal, multinoulli_log_density, print_and_log, get_log_files
@@ -299,9 +299,11 @@ def main(unused_argv):
             r_score = recall_score(y_true=test_y_true, y_pred=test_y_pred)
             f_score = f1_score(y_true=test_y_true, y_pred=test_y_pred)
             cm = confusion_matrix(y_true=test_y_true, y_pred=test_y_pred)
+            fpr = cm[0][1]/(cm[0][0]+cm[0][1])
+            fnr = cm[1][0]/(cm[1][0]+cm[1][1])
             print(f"\nTOTAL Y_TRUE: {sum(test_y_true)} Y_PRED: {sum(test_y_pred)}")
             print(cm)
-            print(f"Accuracy: {a_score} Precision: {p_score} Recall: {r_score} F1-Score: {f_score}\n")
+            print(f"Accuracy: {a_score} Precision: {p_score} Recall: {r_score} F1-Score: {f_score}\n FPR: {fpr} FNR: {fnr}\n")
             
             print_and_log(logfile, 'Held out accuracy: {0:5.3f} +/- {1:5.3f} on {2:}'
                           .format(test_accuracy, confidence_interval_95, model_path))
